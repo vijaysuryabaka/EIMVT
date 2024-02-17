@@ -58,4 +58,3 @@ def listen_and_transcribe():
     p.terminate()
 
 listen_and_transcribe()
-    
