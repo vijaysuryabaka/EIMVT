@@ -5,7 +5,7 @@ from google.cloud import speech
 # Path to your Google Cloud credentials JSON file
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "tribal-booth-414608-dbc61449795a.json"
 
-# Audio recording parameters
+
 RATE = 16000
 CHUNK = int(RATE / 10)  # 100ms
 
@@ -17,8 +17,6 @@ def listen_and_transcribe():
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
         sample_rate_hertz=RATE,
         language_code="en-US",  # Default fallback language
-        # Assuming the API or future updates might allow broader automatic detection
-        # This setup specifies a wide range of languages as alternatives
         alternative_language_codes=['es-ES', 'fr-FR', 'de-DE', 'hi-IN', 'ar-SA', 'zh-CN', 'ru-RU', 'ja-JP', 'pt-PT', 'it-IT','ta-IN'],
     )
     streaming_config = speech.StreamingRecognitionConfig(
