@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "tribal-booth-414608",
+  "private_key_id": "dbc61449795a26fd53554cde8be02cf35571e10b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC1M2rN8GR1Q0mb\noNGUGH6Zn6m8KdoQJa6rbKEnNC9wC9J/DQ9kdcOj+FufDde6iivCS4G5cUH8kDqy\nUeOy2cO7mHaNmmym3q8yVGANhDNzxWeu408c546cCt1+PSJ+o5LTKSe2EK9IL5QR\nPBaG/XdbDqqPThksUzk9ehPFxxNYUWEj4PQIJHGSYVyq7DqOC7YY1NvuyaAe2dQV\n3RvVFq0j8zGmTmPgg1IwwbT6y5GD1SuKucCfiqxFnTifMENcHGjONs51RjpnbFFU\nvynpRbIoHCPgdt+jPIwdigIjQM3sGi07vG8lzWMWlK8eYozDIPMOqeljkehkDKOJ\nSaxWZJY7AgMBAAECggEAQ2E1TBMiKAC3dGmexUU+fn3CrjeZ4PtCMniYjG15Xl7n\nDVub561q7KRD3adWGwWaNAvD12NoODShvwF4fF9By5ZsL0fHM14HI94AQcZxI5G6\ndmwMVSE+BIR9zJ2LIDBPPrpFDAy0QVF/69C+R8AlC/UuM0/FSJhB5rxocdkPNn2c\nDcShzb42vVy9J1D3maw4lGq5+RsewhXCxt5whhHp+JWdi8RPK2vBLOyHHHEzJGf8\n3hfmIWPYXQPq1q23LOQafyLmIO4S1CP7GdkUc88oSpaTwtgWC3F266spMuVvU9JW\n1PcQWUr78TfqAQn7pDIUPXIHJo6K5ThVEM62MLfg8QKBgQDi8HfBNRPASkSY0TFO\nS2x6LdeaLwbEiNlLRAjD0v1q5WpYDu7SAuiFV62LKFAATvgC6AIRH6Nw5cdfjSIC\nAlYdBW7xhz5oIrpzvBdsDpjH7IYQXe8gSrG2Q5sAmH2tgb1KlmW/a9jS1TSdbgdR\nIeiQxNRtAvOhKUgKPc5yVFaEJQKBgQDMZ4yVOo65GgXsIAFmYaJBuxhVeotqT7hW\nQ6q1nvNWF8wpr46EG3fAC8x1MaGT4Pt7pJ8PZOgIatzC9lwDQuyExRbjIR+V5+37\nSNFGLNOSP3a/WibXs2RtINxRzChuiVAwUza9ACelPd5Ci/06xDmTr8TXEasEBdpy\nFEq58MNy3wKBgFajb1S3qr6ym9Wrp6M4cEWE0tbuNSs7A5oUczQvjMgOpbbQnKRY\nr+SYQIzr6v7zJwQVBxT6ey9SyfbUrrMNqUqTFHPpKg4flAczO83pFLLevZ/p/Kzb\nV1U6IibsEK745Qdgu5+E0NZMxzWDGBAFXgBG5MJpahGQ7Qvb5MEJKa5xAoGAWpkq\n/pnN2M1oApjNBgwQVwIObxS55o0fL10etRGW2XoCzBc8G+Hw2fZg0TEGZP07ejol\nJjWbgt+aqe94KRnoq5CP7GwqC8+Y89/6ohgMTq5Ce94BiWnCAXynKrpK0XObT1AS\n2wLOj7c0ZFqYCwweWQ93N7xlCItvn1DPLktA1hECgYAr/sT9CINu785hQfbVt25W\nD+VggSIH7WDcNzZumW6Ra2UNUCh1NkGjQnX9nvujYE6O49OV5e8uQHGBxEZZ8kVS\nEaGdkjXnHOhdGQ9cq3K/hFwXcUA4Cezpx/9BgbBYS6aQyZq6BbedrznYI70mDFPo\nbhKl5Xej7sock8mg3G5syA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "speechtotext@tribal-booth-414608.iam.gserviceaccount.com",
+  "client_id": "111021207397672668043",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/speechtotext%40tribal-booth-414608.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
