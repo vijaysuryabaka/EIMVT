@@ -24,6 +24,6 @@ def detect_emotion(text):
     return probabilities # Or your mapped emotion
 
 # Example usage
-text = "i am so happy, that i feel like flying" # Example in French
+text = "i am so happy, that i feel like flying in sky" # Example in French
 emotion = detect_emotion(text)
 print(emotion)

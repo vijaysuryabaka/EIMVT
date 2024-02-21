@@ -147,23 +147,26 @@ def listen_print_loop(responses: object) -> str:
         # Display the transcription of the top alternative.
         transcript = result.alternatives[0].transcript
 
-        # Determine if the result is interim or final.
-        if not result.is_final:
-            # Display interim results with a carriage return at the end of the line,
-            # so subsequent lines will overwrite them.
-            sys.stdout.write(transcript + '\r')
-            sys.stdout.flush()
-            num_chars_printed = len(transcript)
-        else:
-            # When the result is final, display the detected language (if available)
-            # and the final transcription.
-            detected_language = result.language_code if hasattr(result, 'language_code') else "Unknown"
-            print(f"Detected language: {detected_language}")
-            print(transcript + '\n')
+        # Display interim results, but with a carriage return at the end of the
+        # line, so subsequent lines will overwrite them.
+        #
+        # If the previous result was longer than this one, we need to print
+        # some extra spaces to overwrite the previous result
+        overwrite_chars = " " * (num_chars_printed - len(transcript))
 
-            # Exit the loop if the transcript contains exit keywords.
-            if re.search(r'\b(exit|quit)\b', transcript, re.I):
-                print('Exiting...')
+        if not result.is_final:
+            sys.stdout.write(transcript + overwrite_chars + "\r")
+            sys.stdout.flush()
+
+            num_chars_printed = len(transcript)
+
+        else:
+            print(transcript + overwrite_chars)
+
+            # Exit recognition if any of the transcribed phrases could be
+            # one of our keywords.
+            if re.search(r"\b(exit|quit)\b", transcript, re.I):
+                print("Exiting..")
                 break
 
             num_chars_printed = 0
@@ -175,16 +178,15 @@ def main() -> None:
     """Transcribe speech from audio file."""
     # See http://g.co/cloud/speech/docs/languages
     # for a list of supported languages.
-    # a BCP-47 language tag
+
+    language_code = "hi-IN"  
 
     client = speech.SpeechClient()
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
         sample_rate_hertz=RATE,
-        language_code="en-US",  # This might act as a default or hint
-        alternative_language_codes=['es-ES', 'fr-FR', 'de-DE', 'ja-JP', 'ru-RU'],  # Example list of languages
-        # Enable automatic language detection
-        enable_automatic_punctuation=True,
+        language_code=language_code,
+        alternative_language_codes=["es-ES", "en-US","hi-IN","ja-JP"],
     )
 
     streaming_config = speech.StreamingRecognitionConfig(
@@ -206,3 +208,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+    
