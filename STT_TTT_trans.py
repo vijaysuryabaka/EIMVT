@@ -89,7 +89,7 @@ class MicrophoneStream:
             yield b"".join(data)
 
 
-def listen_print_loop(responses: object) -> str:
+def listen_print_loop(responses: object , target_languagee) -> str:
     """Iterates through server responses and prints them."""
     num_chars_printed = 0
     for response in responses:
@@ -110,11 +110,11 @@ def listen_print_loop(responses: object) -> str:
             detected_language = result.language_code if hasattr(result, 'language_code') else "Unknown"
             print(f"Detected language: {detected_language}")
             print(transcript + '\n')
-            trans_text,emotext = translator(transcript)
+            trans_text,emotext = translator(transcript,target_languagee)
             print(trans_text)
             print("emotext:",emotext)
             emotions(emotext)
-            text_to_speech(trans_text, "output.mp3")
+            text_to_speech(trans_text, "output.mp3",target_languagee)
             pygame.mixer.init()
         
             # Play the audio using pygame
@@ -142,7 +142,14 @@ def listen_print_loop(responses: object) -> str:
 
 def main() -> None:
     """Transcribe speech from audio file."""
-    user_lang ="ta-IN"
+    #"""
+
+    user_lang=input("Enter user Language:")
+    target_languagee=input("Enter output Language:")
+
+    #"""
+    #user_lang ="ta-IN"
+
     client = speech.SpeechClient()
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
@@ -165,14 +172,14 @@ def main() -> None:
 
         responses = client.streaming_recognize(streaming_config, requests)
 
-        listen_print_loop(responses)
+        listen_print_loop(responses,target_languagee)
 
 
-def translator(source_text):
+def translator(source_text,target_languagee):
     translate_client = translate.Client()
 
     # Translates the text into the target language
-    translation = translate_client.translate(source_text, target_language='en-US')
+    translation = translate_client.translate(source_text, target_language=target_languagee)
 
     #for emotions handling
     emotext = translate_client.translate(source_text, target_language='en-US')
@@ -185,13 +192,14 @@ def emotions(text):
     emotion_labels = emotion(text)
     print(emotion_labels)
 
-def text_to_speech(text, output_file):
+def text_to_speech(text, output_file,target_languagee):
     client = texttospeech.TextToSpeechClient()
 
     synthesis_input = texttospeech.SynthesisInput(text=text)
 
     voice = texttospeech.VoiceSelectionParams(
-        language_code="en-US",  # Language code (e.g., "en-US")
+        #language_code="en-US",  # Language code (e.g., "en-US")
+        language_code=target_languagee,
         name="en-US-Wavenet-D",  # Voice name (e.g., "en-US-Wavenet-D")
         ssml_gender=texttospeech.SsmlVoiceGender.FEMALE  # Gender of the voice
     )
