@@ -6,8 +6,9 @@ import pyaudio
 from google.cloud import speech, texttospeech
 from google.cloud import translate_v2 as translate
 import pyaudio
-import openai
 import os
+from transformers import pipeline
+emotion = pipeline('sentiment-analysis', model='arpanghoshal/EmoRoBERTa')
 
 # Set Google Cloud credentials
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "tribal-booth-414608-dbc61449795a.json"
@@ -16,8 +17,6 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "tribal-booth-414608-dbc61449795a
 RATE = 16000
 CHUNK = int(RATE / 10)  # 100ms
 
-# Set OpenAI API key
-openai.api_key = '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'
 
 class MicrophoneStream:
     """Opens a recording stream as a generator yielding the audio chunks."""
@@ -111,8 +110,10 @@ def listen_print_loop(responses: object) -> str:
             detected_language = result.language_code if hasattr(result, 'language_code') else "Unknown"
             print(f"Detected language: {detected_language}")
             print(transcript + '\n')
-            trans_text = translator(transcript)
+            trans_text,emotext = translator(transcript)
             print(trans_text)
+            print("emotext:",emotext)
+            emotions(emotext)
             text_to_speech(trans_text, "output.mp3")
             pygame.mixer.init()
         
@@ -136,6 +137,8 @@ def listen_print_loop(responses: object) -> str:
             num_chars_printed = 0
 
     return transcript
+
+
 
 def main() -> None:
     """Transcribe speech from audio file."""
@@ -171,10 +174,16 @@ def translator(source_text):
     # Translates the text into the target language
     translation = translate_client.translate(source_text, target_language='en-US')
 
-    return translation['translatedText']
+    #for emotions handling
+    emotext = translate_client.translate(source_text, target_language='en-US')
 
-    return
+    return translation['translatedText'], emotext['translatedText']
+    
 
+
+def emotions(text):
+    emotion_labels = emotion(text)
+    print(emotion_labels)
 
 def text_to_speech(text, output_file):
     client = texttospeech.TextToSpeechClient()
