@@ -1,6 +1,7 @@
 from translate import Translator
 from langdetect import detect
 
+
 language_mapping = {
     'afrikaans': 'af',
     'albanian': 'sq',
