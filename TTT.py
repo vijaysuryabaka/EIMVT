@@ -132,4 +132,4 @@ if __name__ == "__main__":
         else:
             print("Invalid target language.")
     else:
-        print("Language detection failed.")
+        print("Language detection Failed.")
