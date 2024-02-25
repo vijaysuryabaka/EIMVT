@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Translation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .top {
+            background-color: #ffffff;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;     
+        }
+
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+            margin-left: 10px;
+        }
+
+        select {
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .sec {
+            padding: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: darksalmon;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 20px;
+        }
+
+        p {
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid black;
+            border-radius: 4px;
+            width: calc(100% - 140px);
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <form action="/" method="post">
+        <div class="top">
+            <label for="from">User Language:</label>
+            <select name="from" id="from">
+                <option value="" selected>Choose a Language</option>
+                <option value="tam">Tamil</option>
+                <option value="eng">English</option>
+                <option value="fre">French</option>
+                <option value="jap">Japanese</option>
+            </select>
+            <label for="to">Receiver Language:</label>
+            <select name="to" id="to">
+                <option value="" selected>Choose a Language</option>
+                <option value="tam">Tamil</option>
+                <option value="eng">English</option>
+                <option value="fre">French</option>
+                <option value="jap">Japanese</option>
+            </select>
+        </div>
+        <button type="submit">Start Recording</button>
+    </form>
+        <div class="sec">
+            <div class="transcribe">Transcribe Text:
+                <p>{{transcribed_text}}</p>
+            </div>
+            <div class="translate">Translated Text:
+                <p>{{translated_text}}</p>
+            </div>
+            <div class="transcribe">Emotion:
+                <p>{{emotion}}</p>
+            </div>
+        </div>
+    
+</body>
+</html>
