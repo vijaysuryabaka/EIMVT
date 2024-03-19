@@ -1,14 +1,16 @@
+from flask import Flask, render_template, request
 import queue
 import re
 import sys
 import pygame
 import pyaudio
-from google.cloud import speech, texttospeech
-from google.cloud import translate_v2 as translate
-import pyaudio
+from google.cloud import speech, texttospeech, translate_v2 as translate
 import os
 from transformers import pipeline
+
 emotion = pipeline('sentiment-analysis', model='arpanghoshal/EmoRoBERTa')
+
+app = Flask(__name__)
 
 # Set Google Cloud credentials
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "tribal-booth-414608-dbc61449795a.json"
@@ -89,7 +91,7 @@ class MicrophoneStream:
             yield b"".join(data)
 
 
-def listen_print_loop(responses: object , target_languagee) -> str:
+def listen_print_loop(responses: object, target_languagee) -> str:
     """Iterates through server responses and prints them."""
     num_chars_printed = 0
     for response in responses:
@@ -110,25 +112,25 @@ def listen_print_loop(responses: object , target_languagee) -> str:
             detected_language = result.language_code if hasattr(result, 'language_code') else "Unknown"
             print(f"Detected language: {detected_language}")
             print(transcript + '\n')
-            trans_text,emotext = translator(transcript,target_languagee)
+            trans_text, emotext = translator(transcript, target_languagee)
             print(trans_text)
-            print("emotext:",emotext)
-            emotions(emotext)
-            text_to_speech(trans_text, "output.mp3",target_languagee)
+            print("emotext:", emotext)
+            emotion = emotions(emotext)
+            text_to_speech(trans_text, "output.mp3", target_languagee)
             pygame.mixer.init()
-        
+
             # Play the audio using pygame
             pygame.mixer.music.load("output.mp3")
             pygame.mixer.music.play()
             while pygame.mixer.music.get_busy():
                 pygame.time.Clock().tick(10)
-            
+
             # Stop and quit pygame mixer
             pygame.mixer.music.stop()
             pygame.mixer.quit()
-            
+
             os.remove("output.mp3")
-            
+            # print(transcript)
 
             if re.search(r'\b(exit|quit)\b', transcript, re.I):
                 print('Exiting...')
@@ -136,69 +138,34 @@ def listen_print_loop(responses: object , target_languagee) -> str:
 
             num_chars_printed = 0
 
-    return transcript
+            return transcript, trans_text, emotion
 
 
-
-def main() -> None:
-    """Transcribe speech from audio file."""
-    #"""
-
-    user_lang=input("Enter user Language:")
-    target_languagee=input("Enter output Language:")
-
-    #"""
-    #user_lang ="ta-IN"
-
-    client = speech.SpeechClient()
-    config = speech.RecognitionConfig(
-        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-        sample_rate_hertz=RATE,
-        language_code=user_lang,  # Default language code
-        alternative_language_codes=['es-ES', 'fr-FR', 'de-DE', 'ja-JP', 'ru-RU', 'ta-IN','hi-IN'],  # Example list of languages
-        enable_automatic_punctuation=True,
-    )
-
-    streaming_config = speech.StreamingRecognitionConfig(
-        config=config, interim_results=True
-    )
-
-    with MicrophoneStream(RATE, CHUNK) as stream:
-        audio_generator = stream.generator()
-        requests = (
-            speech.StreamingRecognizeRequest(audio_content=content)
-            for content in audio_generator
-        )
-
-        responses = client.streaming_recognize(streaming_config, requests)
-
-        listen_print_loop(responses,target_languagee)
-
-
-def translator(source_text,target_languagee):
+def translator(source_text, target_languagee):
     translate_client = translate.Client()
 
     # Translates the text into the target language
     translation = translate_client.translate(source_text, target_language=target_languagee)
 
-    #for emotions handling
+    # for emotions handling
     emotext = translate_client.translate(source_text, target_language='en-US')
 
     return translation['translatedText'], emotext['translatedText']
-    
 
 
 def emotions(text):
     emotion_labels = emotion(text)
     print(emotion_labels[0]['label'])
+    return emotion_labels[0]['label']
 
-def text_to_speech(text, output_file,target_languagee):
+
+def text_to_speech(text, output_file, target_languagee):
     client = texttospeech.TextToSpeechClient()
 
     synthesis_input = texttospeech.SynthesisInput(text=text)
 
     voice = texttospeech.VoiceSelectionParams(
-        #language_code="en-US",  # Language code (e.g., "en-US")
+        # language_code="en-US",  # Language code (e.g., "en-US")
         language_code=target_languagee,
         name="en-US-Wavenet-D",  # Voice name (e.g., "en-US-Wavenet-D")
         ssml_gender=texttospeech.SsmlVoiceGender.FEMALE  # Gender of the voice
@@ -219,4 +186,92 @@ def text_to_speech(text, output_file,target_languagee):
         print(f'Audio content written to "{output_file}"')
 
 
-if __name__ == "__main__":main()
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        from_lang = request.form['from']
+        language_mapping = {
+            'tam': 'ta-IN',  # Tamil
+            'eng': 'en-US',  # English
+            'fre': 'fr-FR',  # French
+            'jap': 'ja-JP'   # Japanese
+            # Add more mappings as needed
+        }
+        target_lang = request.form['to']
+        target_languagee = language_mapping.get(target_lang)
+        user_lang = language_mapping.get(from_lang)
+        print(user_lang,target_languagee)
+        if user_lang:
+            with MicrophoneStream(RATE, CHUNK) as stream:
+                audio_generator = stream.generator()
+                config = speech.RecognitionConfig(
+                    encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+                    sample_rate_hertz=RATE,
+                    language_code=user_lang,
+                    alternative_language_codes=['es-ES', 'fr-FR', 'de-DE', 'ja-JP', 'ru-RU', 'ta-IN', 'hi-IN'],
+                    enable_automatic_punctuation=True,
+                )
+
+                streaming_config = speech.StreamingRecognitionConfig(
+                    config=config, interim_results=True
+                )
+
+                client = speech.SpeechClient()
+                requests = (
+                    speech.StreamingRecognizeRequest(audio_content=content)
+                    for content in audio_generator
+                )
+                responses = client.streaming_recognize(streaming_config, requests)
+
+                transcribed_text,translated_text,emotion= listen_print_loop(responses, target_languagee)
+                # translated_text = translate_text(transcribed_text)
+                # print(translated_text)
+                # text_to_speech(translated_text, "output.mp3", target_languagee)
+
+                # Return the transcribed and translated text to the HTML page
+                print(transcribed_text)
+                return render_template('index.html', transcribed_text=transcribed_text,translated_text= translated_text, emotion = emotion)
+        else:
+            return render_template('index.html', error="Please select a language.")
+
+    return render_template('index.html')
+
+
+# def main() -> None:
+#     """Transcribe speech from audio file."""
+#     # """
+
+#     user_lang = input("Enter user Language:")
+#     target_languagee = input("Enter output Language:")
+
+#     # """
+#     # user_lang ="ta-IN"
+
+#     client = speech.SpeechClient()
+#     config = speech.RecognitionConfig(
+#         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+#         sample_rate_hertz=RATE,
+#         language_code=user_lang,  # Default language code
+#         alternative_language_codes=['es-ES', 'fr-FR', 'de-DE', 'ja-JP', 'ru-RU', 'ta-IN', 'hi-IN'],  # Example list of languages
+#         enable_automatic_punctuation=True,
+#     )
+
+#     streaming_config = speech.StreamingRecognitionConfig(
+#         config=config, interim_results=True
+#     )
+
+#     with MicrophoneStream(RATE, CHUNK) as stream:
+#         audio_generator = stream.generator()
+#         requests = (
+#             speech.StreamingRecognizeRequest(audio_content=content)
+#             for content in audio_generator
+#         )
+
+#         responses = client.streaming_recognize(streaming_config, requests)
+
+#         listen_print_loop(responses, target_languagee)
+
+
+if __name__ == "__main__":
+    # main()
+    app.run(debug=True)
