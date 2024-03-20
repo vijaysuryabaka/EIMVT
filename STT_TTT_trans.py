@@ -5,7 +5,6 @@ import pygame
 import pyaudio
 from google.cloud import speech, texttospeech
 from google.cloud import translate_v2 as translate
-import pyaudio
 import os
 from transformers import pipeline
 emotion = pipeline('sentiment-analysis', model='arpanghoshal/EmoRoBERTa')
@@ -155,7 +154,7 @@ def main() -> None:
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
         sample_rate_hertz=RATE,
         language_code=user_lang,  # Default language code
-        alternative_language_codes=['es-ES', 'fr-FR', 'de-DE', 'ja-JP', 'ru-RU', 'ta-IN','hi-IN'],  # Example list of languages
+        # alternative_language_codes=['es-ES', 'fr-FR', 'de-DE', 'ja-JP', 'ru-RU', 'ta-IN','hi-IN'],  # Example list of languages
         enable_automatic_punctuation=True,
     )
 
