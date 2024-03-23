@@ -204,12 +204,21 @@ voice_params = {'pitch': 0, 'speaking_rate': 1.0}
 
 @app.route('/')
 def index():
-    return render_template('extra.html')
+    return render_template('indexm.html')
+
+@app.route('/main')
+def main():
+    return render_template('main.html')
 
 @app.route('/start', methods=['POST'])
 def start():
     recorder.start_recording()
     return jsonify({'success': True})
+
+# @app.route('/start', methods=['POST'])
+# def start():
+#     recorder.start_recording()
+#     return jsonify({'success': True})
 
 @app.route('/stop', methods=['POST'])
 def stop():
