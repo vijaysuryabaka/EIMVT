@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speech Translation</title>
+    <title>Microphone Recorder</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
     <style>
-        body {
+         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
@@ -51,12 +52,28 @@
         button {
             padding: 10px 20px;
             font-size: 16px;
-            background-color: darksalmon;
+            background-color: dimgrey;
             color: #fff;
             border: black;
             border-radius: 4px;
             cursor: pointer;
             margin-left: 20px;
+        }
+
+        button:disabled {
+            opacity: 0.6; /* Reduce opacity to indicate disabled state */
+            cursor: not-allowed; /* Change cursor to indicate disabled state */
+            color: black;
+        }
+
+        #startBtn:hover{
+            background-color: green;
+            color: cornsilk;
+        }
+
+        #stopBtn:hover{
+            background-color: red;
+            color: cornsilk;
         }
 
         p {
@@ -76,8 +93,8 @@
         <h2>EIMVT</h2>
         <h3>Emotional Intelligent Multilingual Voice Translator</h3>
     </div>
-   
-    <form action="/" method="post">
+
+    <form>
         <div class="top">
             <label for="from">User: </label>
             <select name="from" id="from">
@@ -98,50 +115,67 @@
                 <option value="hin">Hindi</option>
             </select>
         </div>
-        <button type="submit">Start Recording</button>
-        <!--button type="submit">Stop Recording</button-->
     </form>
-        <div class="sec">
-            <div class="transcribe">Transcribe Text:
-                <p>{{ transcribed_text }}</p>
-            </div>
-            <div class="translate">Translated Text:
-                <p>{{ translated_text }}</p>
-            </div>
-            <div class="transcribe">Emotion:
-                <p>{{ emotion }}</p>
-            </div>
+
+    <button id="startBtn">Start Recording</button>
+    <button id="stopBtn" disabled>Stop Recording</button>
+
+    <div class="sec">
+        <div class="transcribe">Transcribe Text:
+            <p id="transcribedText"></p>
         </div>
+        <div class="translate">Translated Text:
+            <p id="translatedText"></p>
+        </div>
+        <div class="emotion">Emotion:
+            <p id="emotion"></p>
+        </div>
+    </div>
 
-        {% if audio %}
-        <audio controls autoplay>
-            <source src="{{ url_for('static', filename='app_op/' + audio) }}" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
-        {% endif %}
-        
+    <audio id="audioPlayer" controls autoplay style="display: none;">
+        <source id="audioSource" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
     <script>
-        // function removeAudio() {
-        //     fetch("/remove_audio")
-        //         .then(response => {
-        //             if (!response.ok) {
-        //                 throw new Error("Failed to remove audio file.");
-        //             }
-        //             console.log("Audio file removed successfully.");
-        //         })
-        //         .catch(error => console.error(error));
-        // }
+        $(document).ready(function() {
+            $('#startBtn').click(function() {
+                $.post('/start', function(data) {
+                    if (data.success) {
+                        $('#startBtn').prop('disabled', true);
+                        $('#stopBtn').prop('disabled', false);
+                    }
+                });
+            });
 
-        // document.getElementById('audioPlayer').addEventListener('ended', function() {
-        //     var xhttp = new XMLHttpRequest();
-        //     xhttp.onreadystatechange = function() {
-        //         if (this.readyState == 4 && this.status == 200) {
-        //             console.log("Audio file removed successfully");
-        //         }
-        //     };
-        //     xhttp.open("GET", "/remove_audio", true);
-        //     xhttp.send();
-        // });
+            $('#stopBtn').click(function() {
+                var fromlang = $('#from').val();
+                var tolang = $('#to').val();
+                $.post('/stop', {from: fromlang, to: tolang}, function(data) {
+                    if (data.success) {
+                        $('#startBtn').prop('disabled', false);
+                        $('#stopBtn').prop('disabled', true);
+
+                        // Update the UI with response data
+                        $('#transcribedText').text(data.tscribed_text);
+                        $('#translatedText').text(data.tslated_text);
+                        $('#emotion').text(data.emotion);
+                        console.log("Audio file path:", data.audio);
+
+
+                        // Update audio source
+                        $('#audioSource').attr('src', data.audio);
+
+
+
+                        // Load and play the audio
+                        var audioPlayer = $('#audioPlayer')[0];
+                        audioPlayer.load();
+                        audioPlayer.play();     
+                }
+                });
+            });
+        });
     </script>
 </body>
 </html>

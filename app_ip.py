@@ -13,14 +13,7 @@ import os
 from transformers import pipeline
 import html
 
-#emotion = pipeline('sentiment-analysis', model='arpanghoshal/EmoRoBERTa')
-tokenizer = AutoTokenizer.from_pretrained('arpanghoshal/EmoRoBERTa')
-
-# Load the TensorFlow model
-model = TFAutoModelForSequenceClassification.from_pretrained('arpanghoshal/EmoRoBERTa', from_tf=True)
-
-# Create a sentiment-analysis pipeline with the loaded model and tokenizer
-emotion = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
+emotion = pipeline('sentiment-analysis', model='arpanghoshal/EmoRoBERTa')
 
 app = Flask(__name__)
 
@@ -112,6 +105,7 @@ def listen_print_loop(responses: object, target_languagee) -> str:
     num_chars_printed = 0
 
     # print("Entering listen_print_loop")  # Add this print statement
+    voice_ip=[]
 
     for response in responses:
         # print("Processing response...")  # Add this print statement
@@ -137,7 +131,17 @@ def listen_print_loop(responses: object, target_languagee) -> str:
             print(trans_text)
             print("emotext:", emotext)
             emotion = emotions(emotext)
-            audio_name = text_to_speech(trans_text, target_languagee,"static/app_op",emotion)
+            audio_name = text_to_speech(trans_text, target_languagee,"static/audio_op",emotion)
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            input_v = f"input_{timestamp}.mp3"
+            voice_ip.append({'transcript': transcript, 'audio_file': input_v})
+
+            input_path = os.path.join("static/audio_ip", input_v)
+
+            with open(input_path, "wb") as out:
+                out.write(transcript)
+                print(f'Audio content written to "{input_path}"')
             # pygame.mixer.init()
 
             # # Play the audio using pygame
@@ -163,7 +167,7 @@ def listen_print_loop(responses: object, target_languagee) -> str:
         if emotext:
             return transcript, trans_text, emotion, audio_name
 
-    return transcript, trans_text, emotion
+    return 0
 
 
 
@@ -228,7 +232,7 @@ def text_to_speech(text, target_languagee, output_dir,emotion):
         'sadness': {'pitch': -10, 'speaking_rate': 0.9},
         'surprise': {'pitch': 0, 'speaking_rate': 1.1},
         'neutral': {'pitch': 0, 'speaking_rate': 1.0}  # Neutral emotion
-    } 
+    }
 
     # Set default voice parameters
     voice_params = {'pitch': 0, 'speaking_rate': 1.0}
@@ -266,7 +270,7 @@ def text_to_speech(text, target_languagee, output_dir,emotion):
     #  Generate a unique filename using UUID
     # output_file = str(uuid.uuid4()) + ".mp3"
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_file = f"output_{timestamp}.mp3"
+    output_file = f"{emotion}_{timestamp}.mp3"
     
     output_path = os.path.join(output_dir, output_file)
 
@@ -287,7 +291,7 @@ def index():
             'fre': 'fr-FR',  # French
             'jap': 'ja-JP',# Japanese
             'hin': 'hi-IN'  # hindi
-            
+            # Add more mappings as needed
         }
         target_lang = request.form['to']
         target_languagee = language_mapping.get(target_lang)
@@ -323,12 +327,12 @@ def index():
                 # Return the transcribed and translated text to the HTML page
                 # print(transcribed_text)
                 # audio_file = url_for('static', filename='audio/output.mp3')
-                return render_template('index.html', transcribed_text=transcribed_text,
+                return render_template('app_ip.html', transcribed_text=transcribed_text,
                                        translated_text= translated_text, emotion = emotion,audio=audio_file)
         else:
-            return render_template('index.html', error="Please select a language.")
+            return render_template('app_ip.html', error="Please select a language.")
 
-    return render_template('index.html')
+    return render_template('app_ip.html')
 
 
 

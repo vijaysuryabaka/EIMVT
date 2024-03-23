@@ -90,7 +90,7 @@
             </select>
             <label for="to">Receiver: </label>
             <select name="to" id="to">
-                <option value="" selected>Choose a Language</option>
+                <option value="" selected>Choose  Language</option>
                 <option value="tam">Tamil</option>
                 <option value="eng">English</option>
                 <option value="fre">French</option>
@@ -115,7 +115,7 @@
 
         {% if audio %}
         <audio controls autoplay>
-            <source src="{{ url_for('static', filename='app_op/' + audio) }}" type="audio/mpeg">
+            <source src="{{ url_for('static', filename='audio_op/' + audio) }}" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
         {% endif %}

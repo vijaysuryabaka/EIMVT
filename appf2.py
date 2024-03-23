@@ -1,26 +1,16 @@
 from datetime import datetime
 import time
-# import uuid
-from flask import Flask, render_template, request, send_from_directory, url_for
+from flask import Flask, render_template, request, jsonify
 import queue
-import re
 import sys
-import pygame
 import pyaudio
 from google.cloud import speech, texttospeech
 from google.cloud import translate_v2 as translate
 import os
-from transformers import pipeline
 import html
+from transformers import pipeline
 
-#emotion = pipeline('sentiment-analysis', model='arpanghoshal/EmoRoBERTa')
-tokenizer = AutoTokenizer.from_pretrained('arpanghoshal/EmoRoBERTa')
-
-# Load the TensorFlow model
-model = TFAutoModelForSequenceClassification.from_pretrained('arpanghoshal/EmoRoBERTa', from_tf=True)
-
-# Create a sentiment-analysis pipeline with the loaded model and tokenizer
-emotion = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
+emotion = pipeline('sentiment-analysis', model='arpanghoshal/EmoRoBERTa')
 
 app = Flask(__name__)
 
@@ -31,8 +21,6 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "tribal-booth-414608-dbc61449795a
 RATE = 16000
 CHUNK = int(RATE / 10)  # 100ms
 
-# AUDIO_DIR = "static/audio"
-
 class MicrophoneStream:
     """Opens a recording stream as a generator yielding the audio chunks."""
 
@@ -40,10 +28,10 @@ class MicrophoneStream:
         """The audio -- and generator -- is guaranteed to be on the main thread."""
         self._rate = rate
         self._chunk = chunk
-
         # Create a thread-safe buffer of audio data
         self._buff = queue.Queue()
-        self.closed = True
+        self._stream_closed = True  # Flag to indicate whether the stream is closed
+        self._stop_stream = False  # Flag to control when to stop the stream
 
     def __enter__(self: object) -> object:
         self._audio_interface = pyaudio.PyAudio()
@@ -55,8 +43,8 @@ class MicrophoneStream:
             frames_per_buffer=self._chunk,
             stream_callback=self._fill_buffer,
         )
-
-        self.closed = False
+        self._stream_closed = False  # Stream is opened
+        self._stop_stream = False  # Reset stop stream flag
 
         return self
 
@@ -69,7 +57,7 @@ class MicrophoneStream:
         """Closes the stream, regardless of whether the connection was lost or not."""
         self._audio_stream.stop_stream()
         self._audio_stream.close()
-        self.closed = True
+        self._stream_closed = True  # Stream is closed
         self._buff.put(None)
         self._audio_interface.terminate()
 
@@ -86,7 +74,7 @@ class MicrophoneStream:
 
     def generator(self: object) -> object:
         """Generates audio chunks from the stream of audio data in chunks."""
-        while not self.closed:
+        while not self.closed and not self._stop_stream:  # Check the flag to stop streaming
             chunk = self._buff.get()
             if chunk is None:
                 return
@@ -111,11 +99,7 @@ def listen_print_loop(responses: object, target_languagee) -> str:
     transcript = ""  # Initialize transcript
     num_chars_printed = 0
 
-    # print("Entering listen_print_loop")  # Add this print statement
-
     for response in responses:
-        # print("Processing response...")  # Add this print statement
-
         if not response.results:
             continue
 
@@ -137,51 +121,31 @@ def listen_print_loop(responses: object, target_languagee) -> str:
             print(trans_text)
             print("emotext:", emotext)
             emotion = emotions(emotext)
-            audio_name = text_to_speech(trans_text, target_languagee,"static/app_op",emotion)
-            # pygame.mixer.init()
+            audio_name = text_to_speech(trans_text, "output.mp3", target_languagee,"static/audio",emotion)
 
-            # # Play the audio using pygame
-            # pygame.mixer.music.load("output.mp3")
-            # pygame.mixer.music.play()
-            # while pygame.mixer.music.get_busy():
-            #     pygame.time.Clock().tick(10)
-
-            # # Stop and quit pygame mixer
-            # pygame.mixer.music.stop()
-            # pygame.mixer.quit()
-
-            # os.remove("output.mp3")
-            # print(transcript)
-
-            if emotext=="exit":
+            if emotext == "exit":
                 print('Exiting...')
-                break
+                return transcript, trans_text, emotion, audio_name  # Return the values and exit the loop
 
             num_chars_printed = 0
 
-        # print("Exiting listen_print_loop")
         if emotext:
-            return transcript, trans_text, emotion, audio_name
+            return transcript, trans_text, emotion, audio_name  # Return the values
 
     return transcript, trans_text, emotion
-
 
 
 def translator(source_text, target_languagee):
     translate_client = translate.Client()
 
-    # Translates the text into the target language
     translation = translate_client.translate(source_text, target_language=target_languagee)
 
-    # for emotions handling
     emotext = translate_client.translate(source_text, target_language='en-US')
 
-    # Decode HTML entities in translated text
     translated_text = html.unescape(translation['translatedText'])
     emotext_text = html.unescape(emotext['translatedText'])
 
     return translated_text, emotext_text
-
 
 
 def emotions(text):
@@ -190,15 +154,14 @@ def emotions(text):
     return emotion_labels[0]['label']
 
 
-def text_to_speech(text, target_languagee, output_dir,emotion):
+def text_to_speech(text, output_file, target_languagee, output_dir, emotion):
     voice_map={
         'ta:IN' : 'ta-IN-Wavenet-D',
         'en-US' : 'en-US-Wavenet-D',
         'fr-FR' : 'fr-FR-Standard-D',
         'ja-JP' : 'ja-JP-Wavenet-D',
         'hi-IN' : 'hi-IN-Wavenet-D'    }
-    
-        # Define voice parameters for each emotion
+
     emotion_to_voice_params = {
         'admiration': {'pitch': 10, 'speaking_rate': 1.1},
         'amusement': {'pitch': 10, 'speaking_rate': 1.1},
@@ -228,33 +191,29 @@ def text_to_speech(text, target_languagee, output_dir,emotion):
         'sadness': {'pitch': -10, 'speaking_rate': 0.9},
         'surprise': {'pitch': 0, 'speaking_rate': 1.1},
         'neutral': {'pitch': 0, 'speaking_rate': 1.0}  # Neutral emotion
-    } 
+    }
 
-    # Set default voice parameters
     voice_params = {'pitch': 0, 'speaking_rate': 1.0}
 
-    # Update voice parameters based on the detected emotion
     if emotion in emotion_to_voice_params:
         voice_params.update(emotion_to_voice_params[emotion])
 
+    print(voice_params['pitch'], voice_params['speaking_rate'])
 
-    print(voice_params['pitch'],voice_params['speaking_rate'])
-    
     client = texttospeech.TextToSpeechClient()
 
     synthesis_input = texttospeech.SynthesisInput(text=text)
 
     voice = texttospeech.VoiceSelectionParams(
-        # language_code="en-US",  # Language code (e.g., "en-US")
         language_code=target_languagee,
-        name=voice_map.get(target_languagee),  # Voice name (e.g., "en-US-Wavenet-D")
-        ssml_gender=texttospeech.SsmlVoiceGender.MALE  # Gender of the voice
+        name=voice_map.get(target_languagee),
+        ssml_gender=texttospeech.SsmlVoiceGender.MALE
     )
-    print( target_languagee,voice.name,voice.language_code)
+
     audio_config = texttospeech.AudioConfig(
         audio_encoding=texttospeech.AudioEncoding.MP3,
-        pitch = voice_params['pitch'],
-        speaking_rate = voice_params['speaking_rate'] # Output audio format
+        pitch=voice_params['pitch'],
+        speaking_rate=voice_params['speaking_rate']
     )
 
     response = client.synthesize_speech(
@@ -263,10 +222,8 @@ def text_to_speech(text, target_languagee, output_dir,emotion):
         audio_config=audio_config
     )
 
-    #  Generate a unique filename using UUID
-    # output_file = str(uuid.uuid4()) + ".mp3"
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_file = f"output_{timestamp}.mp3"
+    output_file = f"{emotion}_{timestamp}.mp3"
     
     output_path = os.path.join(output_dir, output_file)
 
@@ -277,35 +234,45 @@ def text_to_speech(text, target_languagee, output_dir,emotion):
     return output_file
 
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    if request.method == 'POST':
-        from_lang = request.form['from']
-        language_mapping = {
-            'tam': 'ta-IN',  # Tamil
-            'eng': 'en-US',  # English
-            'fre': 'fr-FR',  # French
-            'jap': 'ja-JP',# Japanese
-            'hin': 'hi-IN'  # hindi
-            
+responses = None # Initialize responses variable
+
+language_mapping = {
+            'tam': 'ta-IN',
+            'eng': 'en-US',
+            'fre': 'fr-FR',
+            'jap': 'ja-JP',
+            'hin': 'hi-IN'
         }
-        target_lang = request.form['to']
-        target_languagee = language_mapping.get(target_lang)
-        user_lang = language_mapping.get(from_lang)
-        print(user_lang,target_languagee)
+
+@app.route('/')
+def index():
+    return render_template('page.html')
+
+
+@app.route('/toggle-recording', methods=['POST'])
+def toggle_recording():
+    action = request.form.get('action')
+    print(action)
+    if action == 'start':
+        print("hi")
+        # global responses   # Use global keyword to modify global variable
+        source_lang = request.form['source']  # Corrected line
+        print(source_lang)
+        user_lang = language_mapping.get(source_lang)
+        print(user_lang)
         if user_lang:
             with MicrophoneStream(RATE, CHUNK) as stream:
+                print("Hello")
                 audio_generator = stream.generator()
                 config = speech.RecognitionConfig(
                     encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
                     sample_rate_hertz=RATE,
                     language_code=user_lang,
-                    # alternative_language_codes=['es-ES', 'fr-FR', 'de-DE', 'ja-JP', 'ru-RU', 'ta-IN', 'hi-IN'],
                     enable_automatic_punctuation=True,
                 )
 
                 streaming_config = speech.StreamingRecognitionConfig(
-                    config=config, interim_results=True
+                    config=config, interim_results=True 
                 )
 
                 client = speech.SpeechClient()
@@ -314,87 +281,27 @@ def index():
                     for content in audio_generator
                 )
                 responses = client.streaming_recognize(streaming_config, requests)
+        
+    elif action == 'stop':
+        print("hii")
+        target_lang = request.form.get('to')
+        target_languagee = language_mapping.get(target_lang)
+        print(target_languagee)
+        transcribed_text, translated_text, emotion, audio_file = listen_print_loop(responses, target_languagee)
 
-                transcribed_text,translated_text,emotion, audio_file= listen_print_loop(responses, target_languagee)
-                # translated_text = translate_text(transcribed_text)
-                # print(translated_text)
-                # text_to_speech(translated_text, "output.mp3", target_languagee)
-
-                # Return the transcribed and translated text to the HTML page
-                # print(transcribed_text)
-                # audio_file = url_for('static', filename='audio/output.mp3')
-                return render_template('index.html', transcribed_text=transcribed_text,
-                                       translated_text= translated_text, emotion = emotion,audio=audio_file)
-        else:
-            return render_template('index.html', error="Please select a language.")
-
-    return render_template('index.html')
+    return jsonify({'success': True})
 
 
 
-
-# @app.route('/remove_audio', methods=['GET'])
-# def remove_audio():
-#     try:
-#         os.remove(os.path.join(AUDIO_DIR, "output.mp3"))
-#         print("Audio file removed successfully")
-#         return "Audio file removed successfully"
-#     except Exception as e:
-#         print(f"Error removing audio file: {e}")
-#         return "Error removing audio file"
-
-# @app.route('/remove_audio', methods=['GET'])
-# def remove_audio():
-#     # Remove the audio file
-#     audio_path = os.path.join(app.static_folder, 'audio', 'output.mp3')
-#     if os.path.exists(audio_path):
-#         os.remove(audio_path)
-#         print("Audio file removed successfully.")
-#     else:
-#         print("Audio file does not exist.")
-
-#     # Return a response
-#     return "Audio file removed successfully."
-
-# @app.route('/audio/<path:filename>')
-# def serve_audio(filename):
-#     return send_from_directory(AUDIO_DIR, filename)
-
-# def main() -> None:
-#     """Transcribe speech from audio file."""
-#     # """
-
-#     user_lang = input("Enter user Language:")
-#     target_languagee = input("Enter output Language:")
-
-#     # """
-#     # user_lang ="ta-IN"
-
-#     client = speech.SpeechClient()
-#     config = speech.RecognitionConfig(
-#         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-#         sample_rate_hertz=RATE,
-#         language_code=user_lang,  # Default language code
-#         alternative_language_codes=['es-ES', 'fr-FR', 'de-DE', 'ja-JP', 'ru-RU', 'ta-IN', 'hi-IN'],  # Example list of languages
-#         enable_automatic_punctuation=True,
-#     )
-
-#     streaming_config = speech.StreamingRecognitionConfig(
-#         config=config, interim_results=True
-#     )
-
-#     with MicrophoneStream(RATE, CHUNK) as stream:
-#         audio_generator = stream.generator()
-#         requests = (
-#             speech.StreamingRecognizeRequest(audio_content=content)
-#             for content in audio_generator
-#         )
-
-#         responses = client.streaming_recognize(streaming_config, requests)
-
-#         listen_print_loop(responses, target_languagee)
+# @app.route('/stop', methods=['POST'])
+# def stop():
+#     global responses  # Use global keyword to access global variable
+#     target_lang = request.form['to']
+#     target_languagee = language_mapping.get(target_lang)
+#     print(target_languagee)
+#     transcribed_text, translated_text, emotion, audio_file = listen_print_loop(responses, target_languagee)
+#     return jsonify({'success': True})
 
 
 if __name__ == "__main__":
-    # main()
     app.run(debug=True)

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speech Translation</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -77,10 +78,10 @@
         <h3>Emotional Intelligent Multilingual Voice Translator</h3>
     </div>
    
-    <form action="/" method="post">
+    <form action="/toggle-recording" method="POST">
         <div class="top">
-            <label for="from">User: </label>
-            <select name="from" id="from">
+            <label for="source">User: </label>
+            <select name="source" id="source">
                 <option value="" selected>Choose a Language</option>
                 <option value="tam">Tamil</option>
                 <option value="eng">English</option>
@@ -98,8 +99,8 @@
                 <option value="hin">Hindi</option>
             </select>
         </div>
-        <button type="submit">Start Recording</button>
-        <!--button type="submit">Stop Recording</button-->
+        <button type="submit" id="toggleBtn">Start Recording</button>
+        <input type="hidden" name="action" id="action" value="start">
     </form>
         <div class="sec">
             <div class="transcribe">Transcribe Text:
@@ -115,33 +116,29 @@
 
         {% if audio %}
         <audio controls autoplay>
-            <source src="{{ url_for('static', filename='app_op/' + audio) }}" type="audio/mpeg">
+            <source src="{{ url_for('static', filename='audio/' + audio) }}" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
         {% endif %}
         
     <script>
-        // function removeAudio() {
-        //     fetch("/remove_audio")
-        //         .then(response => {
-        //             if (!response.ok) {
-        //                 throw new Error("Failed to remove audio file.");
-        //             }
-        //             console.log("Audio file removed successfully.");
-        //         })
-        //         .catch(error => console.error(error));
-        // }
-
-        // document.getElementById('audioPlayer').addEventListener('ended', function() {
-        //     var xhttp = new XMLHttpRequest();
-        //     xhttp.onreadystatechange = function() {
-        //         if (this.readyState == 4 && this.status == 200) {
-        //             console.log("Audio file removed successfully");
-        //         }
-        //     };
-        //     xhttp.open("GET", "/remove_audio", true);
-        //     xhttp.send();
-        // });
+         $(document).ready(function() {
+            $('#recordingForm').submit(function(event) {
+                event.preventDefault(); // Prevent default form submission
+                var action = $('#action').val();
+                $.post($(this).attr('action'), { action: action }, function() {
+                    // if (data.success) {
+                    if (action === 'start') {
+                        $('#toggleBtn').text('Stop Recording');
+                        $('#action').val('stop');
+                    } else {
+                        $('#toggleBtn').text('Start Recording');
+                        $('#action').val('start');
+                    }
+                    // }
+                });
+            });
+        });
     </script>
 </body>
 </html>
