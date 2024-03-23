@@ -222,7 +222,7 @@ voice_map={
         'en-US' : 'en-US-Wavenet-D',
         'fr-FR' : 'fr-FR-Standard-D',
         'ja-JP' : 'ja-JP-Wavenet-D',
-        'hi-IN' : 'hi-IN-Wavenet-D'   
+        'hi-IN' : 'hi-IN-Wavenet-D'
         }
 
 emotion_to_voice_params = {
