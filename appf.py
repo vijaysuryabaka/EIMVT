@@ -7,8 +7,16 @@ import pyaudio
 from google.cloud import speech, texttospeech, translate_v2 as translate
 import os
 from transformers import pipeline
+from transformers import TFAutoModelForSequenceClassification, AutoTokenizer
 
-emotion = pipeline('sentiment-analysis', model='arpanghoshal/EmoRoBERTa')
+#emotion = pipeline('sentiment-analysis', model='arpanghoshal/EmoRoBERTa')
+tokenizer = AutoTokenizer.from_pretrained('arpanghoshal/EmoRoBERTa')
+
+# Load the TensorFlow model
+model = TFAutoModelForSequenceClassification.from_pretrained('arpanghoshal/EmoRoBERTa', from_tf=True)
+
+# Create a sentiment-analysis pipeline with the loaded model and tokenizer
+emotion = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
 
 app = Flask(__name__)
 
@@ -193,7 +201,7 @@ def index():
         language_mapping = {
             'tam': 'ta-IN',  # Tamil
             'eng': 'en-US',  # English
-            'fre': 'fr-FR',  # French
+            'fre': 'fr-FR',  # Frenchxxx
             'jap': 'ja-JP'   # Japanese
             # Add more mappings as needed
         }
