@@ -265,14 +265,14 @@
 
 
                         // Update audio source
-                        $('#audioSource').attr('src', data.audio);
+                        $('#audioSource').attr('src', data.audio_url);
 
 
 
                         // Load and play the audio
                         var audioPlayer = $('#audioPlayer')[0];
                         audioPlayer.load();
-                        audioPlayer.play();     
+                        audioPlayer.play();
                 }
                 });
             });

@@ -3,7 +3,6 @@ import os
 import threading
 import wave
 from datetime import datetime
-
 import boto3
 import pyaudio
 from botocore.exceptions import NoCredentialsError
@@ -74,11 +73,9 @@ class MicrophoneRecorder:
         transcribed_text = self.transcribe_audio(s3_input_path, fromlang)
         translated_text, emotext = self.trans_text(transcribed_text, tolang)
         emotion = self.emotionlabel(emotext)
-        s3_output_path = self.tts(translated_text, tolang, emotion, "templates")
+        audio_url = self.tts(translated_text, tolang, emotion)
 
-        # Generate and return the S3 URL of the output audio
-        output_url = self.generate_s3_url(s3_output_path)
-        return transcribed_text, translated_text, emotion, output_url
+        return transcribed_text, translated_text, emotion, audio_url
 
     def save_recording(self, filename):
         wf = wave.open(filename, 'wb')
@@ -152,7 +149,7 @@ class MicrophoneRecorder:
         print(emotion[0]['label'])
         return emotion[0]['label']
     
-    def tts(self, text, tolang, emotion, out_dir="/templates",):
+    def tts(self, text, tolang, emotion):
         if emotion in emotion_to_voice_params:
             voice_params.update(emotion_to_voice_params[emotion])
 
@@ -181,18 +178,27 @@ class MicrophoneRecorder:
             audio_config=audio_config
         )
 
-        #  Generate a unique filename using UUID
-        # output_file = str(uuid.uuid4()) + ".mp3"
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_file = f"op_{timestamp}.mp3"
+        local_filename = f"op_{timestamp}.mp3"
+        local_filepath = os.path.join("static", local_filename)
+        # Use a temp directory for local storage
+        s3_filepath = f"audio/{local_filename}"
+
+        # Save locally
+        if not os.path.exists("static"):
+            os.makedirs("static")
+        with open(local_filepath, "wb") as out_file:
+            out_file.write(response.audio_content)
+            print(f"Audio content written to {local_filepath}")
+
+        # Upload to S3
+        self.upload_file_to_s3(local_filepath, s3_filepath)
+
+        # Return S3 URL
+        self.generate_s3_url(s3_filepath)
         
-        output_path = os.path.join(out_dir, output_file)
-
-        with open(output_path, "wb") as out:
-            out.write(response.audio_content)
-            print(f'Audio content written to "{output_path}"')
-
-        return output_path
+        audio_url = local_filepath
+        return audio_url
     
     def upload_file_to_s3(self, file_name, s3_file_path):
         try:
