@@ -124,7 +124,7 @@ class MicrophoneRecorder:
             print(f"Error during transcription: {e}")
             transcribed_text = ""
 
-        # Optionally delete the local file if no longer needed
+        # Optionally delete the local file if no longer
         os.remove(local_file_path)
         print("Transcribed Text:",transcribed_text)
         
