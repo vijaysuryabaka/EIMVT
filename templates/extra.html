@@ -157,21 +157,21 @@
                         $('#stopBtn').prop('disabled', true);
 
                         // Update the UI with response data
-                        $('#transcribedText').text(data.tscribed_text);
-                        $('#translatedText').text(data.tslated_text);
+                        $('#transcribedText').text(data.transcribed_text);
+                        $('#translatedText').text(data.translated_text);
                         $('#emotion').text(data.emotion);
-                        console.log("Audio file path:", data.audio);
+                        console.log("Audio file path:", data.audio_url);
 
 
                         // Update audio source
-                        $('#audioSource').attr('src', data.audio);
+                        $('#audioSource').attr('src', data.audio_url);
 
 
 
                         // Load and play the audio
                         var audioPlayer = $('#audioPlayer')[0];
                         audioPlayer.load();
-                        audioPlayer.play();     
+                        audioPlayer.play();
                 }
                 });
             });
