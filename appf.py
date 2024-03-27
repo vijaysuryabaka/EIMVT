@@ -13,7 +13,14 @@ import os
 from transformers import pipeline
 import html
 
-emotion = pipeline('sentiment-analysis', model='arpanghoshal/EmoRoBERTa')
+#emotion = pipeline('sentiment-analysis', model='arpanghoshal/EmoRoBERTa')
+tokenizer = AutoTokenizer.from_pretrained('arpanghoshal/EmoRoBERTa')
+
+# Load the TensorFlow model
+model = TFAutoModelForSequenceClassification.from_pretrained('arpanghoshal/EmoRoBERTa', from_tf=True)
+
+# Create a sentiment-analysis pipeline with the loaded model and tokenizer
+emotion = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
 
 app = Flask(__name__)
 

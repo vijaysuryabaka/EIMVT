@@ -111,9 +111,9 @@ def listen_print_loop(responses: object , target_languagee) -> str:
             print(transcript + '\n')
             trans_text,emotext = translator(transcript,target_languagee)
             print(trans_text)
-            print("emotext:",emotext)
-            emotions(emotext)
-            text_to_speech(trans_text, "output.mp3",target_languagee)
+            #print("emotext:",emotext)
+            detected_emotions=emotions(emotext)
+            text_to_speech(trans_text, "output.mp3",target_languagee,detected_emotions)
             pygame.mixer.init()
         
             # Play the audio using pygame
@@ -189,22 +189,82 @@ def translator(source_text,target_languagee):
 
 def emotions(text):
     emotion_labels = emotion(text)
+    detected_emotions=emotion_labels[0]['label']
     print(emotion_labels[0]['label'])
+    return detected_emotions
 
-def text_to_speech(text, output_file,target_languagee):
+def modulate(detected_emotion):
+    # Default values for neutral emotion
+    pitch = 0
+    speaking_rate = 1.0
+
+    emotion_modulations = {
+        "admiration": {"pitch": 5, "rate": 1.1},
+        "amusement": {"pitch": 8, "rate": 1.2},
+        "anger": {"pitch": -2, "rate": 1.3},
+        "annoyance": {"pitch": -4, "rate": 1.1},
+        "approval": {"pitch": 5, "rate": 1.1},
+        "caring": {"pitch": 6, "rate": 1.0},
+        "confusion": {"pitch": 0, "rate": 0.9},
+        "curiosity": {"pitch": 4, "rate": 1.1},
+        "desire": {"pitch": 5, "rate": 1.0},
+        "disappointment": {"pitch": -4, "rate": 0.8},
+        "disapproval": {"pitch": -5, "rate": 0.9},
+        "disgust": {"pitch": -6, "rate": 0.8},
+        "embarrassment": {"pitch": -2, "rate": 0.9},
+        "excitement": {"pitch": 9, "rate": 1.4},
+        "fear": {"pitch": -3, "rate": 1.2},
+        "gratitude": {"pitch": 6, "rate": 1.0},
+        "grief": {"pitch": -10, "rate": 0.7},
+        "joy": {"pitch": 10, "rate": 1.3},
+        "love": {"pitch": 6, "rate": 1.0},  
+        "nervousness": {"pitch": -1, "rate": 1.2},
+        "optimism": {"pitch": 7, "rate": 1.2},
+        "pride": {"pitch": 6, "rate": 1.1},
+        "realization": {"pitch": 3, "rate": 1.0},
+        "relief": {"pitch": 5, "rate": 1.0},
+        "remorse": {"pitch": -8, "rate": 0.9},
+        "sadness": {"pitch": -5, "rate": 0.8},
+        "surprise": {"pitch": 4, "rate": 1.2},
+        "neutral": {"pitch": 0, "rate": 1.0}
+    }
+
+    # Apply modulation if the emotion is recognized
+    if detected_emotion in emotion_modulations:
+        pitch = emotion_modulations[detected_emotion]["pitch"]
+        speaking_rate = emotion_modulations[detected_emotion]["rate"]
+
+    return pitch, speaking_rate
+
+
+def text_to_speech(text, output_file,target_languagee,detected_emotions):
     client = texttospeech.TextToSpeechClient()
-
+    voice_map = {
+    'ta-IN': 'ta-IN-Wavenet-D',
+    'en-US': 'en-US-Wavenet-D',
+    'fr-FR': 'fr-FR-Standard-D',
+    'ja-JP': 'ja-JP-Wavenet-D',
+    'hi-IN': 'hi-IN-Wavenet-D'
+}
+    
     synthesis_input = texttospeech.SynthesisInput(text=text)
+    pitch, speaking_rate = modulate(detected_emotions)
+    voice_name = voice_map.get(target_languagee, None)
+    if not voice_name:
+        print(f"Voice not found for language {target_languagee}, using default.")
+        voice_name = "en-US-Wavenet-D"
 
     voice = texttospeech.VoiceSelectionParams(
         #language_code="en-US",  # Language code (e.g., "en-US")
         language_code=target_languagee,
-        name="en-US-Wavenet-D",  # Voice name (e.g., "en-US-Wavenet-D")
-        ssml_gender=texttospeech.SsmlVoiceGender.FEMALE  # Gender of the voice
+        name=voice_name,  # Voice name (e.g., "en-US-Wavenet-D")
+        ssml_gender=texttospeech.SsmlVoiceGender.MALE  # Gender of the voice
     )
 
     audio_config = texttospeech.AudioConfig(
-        audio_encoding=texttospeech.AudioEncoding.MP3  # Output audio format
+        audio_encoding=texttospeech.AudioEncoding.MP3,
+        pitch=pitch,
+        speaking_rate=speaking_rate  # Output audio format
     )
 
     response = client.synthesize_speech(
@@ -212,7 +272,8 @@ def text_to_speech(text, output_file,target_languagee):
         voice=voice,
         audio_config=audio_config
     )
-
+    print(voice_name)
+    print(pitch,)
     with open(output_file, "wb") as out:
         out.write(response.audio_content)
         print(f'Audio content written to "{output_file}"')

@@ -8,8 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" rel="stylesheet"> <!-- Font Awesome CSS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
-    <title>Document</title>
+    <title>EIMVT</title>
     <style>
         body {
             font-family: 'Raleway', sans-serif;
@@ -25,9 +24,9 @@
             font-size: 30px;
             color: #00694e;
         }
-        img {
-            max-width: 7%;
-            max-height: 7%;
+        .logo {
+            max-width: 67% !important;
+            max-height: 90% !important;
         }
         .prof{
             width: 35px !important; 
@@ -59,8 +58,8 @@
             border: none;
 
         }
-        #arrow img{
-            width: 300px !important;
+        #arrow{
+            width: 200px !important;
         }
         /* .label-div {
             display: flex;
@@ -77,11 +76,10 @@
             padding: 10px;
             border-radius: 10px;
         }
+    
         button:disabled {
             opacity: 0.6; /* Reduce opacity to indicate disabled state */
-            cursor: not-allowed; /* Change cursor to indicate disabled state */
-            color: black;
-            cursor: not-allowed;
+            cursor: not-allowed !important; /* Change cursor to indicate disabled state */
         }
 
         #start:hover{
@@ -93,13 +91,42 @@
             background-color: red;
             color: cornsilk;
         }
+
+        .review{
+            display: none;
+            background-color: #FBF6F1;
+            border: none;
+            color: grey;
+
+        }
+    
+        .good:hover{
+            color: #00694e !important;
+        }
+
+        .bad:hover{
+            color: red !important;
+        }
+
+        #emo::first-letter, #tscribe_text::first-letter, #tslate_text::first-letter{
+            text-transform: uppercase;
+        }
+        #feedbk{
+            display: none;
+            background-color: #FBF6F1;
+            outline: none;
+            border: solid 1px #00694E;
+            padding-left: 10px;
+            border-radius: 25px;
+            width: max-content;
+        }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="container-fluid">
-            <img src="static/nav logo.png" alt="logo">
-            <img class="prof" src="static/gg_profile.png" alt="prof">
+            <a href="/"><img class="logo" src="static/nav logo.png" alt="logo"></a>
+            <a href="/user"><img class="prof" src="static/gg_profile.png" alt="prof"></a>
         </div>
     </nav>
 
@@ -109,35 +136,31 @@
                 <h4>Emotional Intelligence Multi-Lingual Voice Translator</h4>
             </div>
 
-            <div class="row d-flex align-items-center justify-content-between" style="margin: 0px 0px 30px 0;">
-                <div class="col d-flex align-items-end">
-                    <div class="label-div">
-                        <label for="from">Source Language : </label>
-                        <select name="from" id="from">
-                            <option value="" selected>Choose a Language</option>
-                            <option value="tam">Tamil</option>
-                            <option value="eng">English</option>
-                            <option value="fre">French</option>
-                            <option value="jap">Japanese</option>
-                            <option value="hin">Hindi</option>
-                        </select>
-                    </div>
+            <div class="row d-flex align-items-center" style="margin: 0px 0px 30px 0;">
+                <div class="col d-flex align-items-center justify-content-end">
+                    <label for="from">Source Language : </label>
+                    <select name="from" id="from">
+                        <option value="none" selected>Choose a Language</option>
+                        <option value="tam">Tamil</option>
+                        <option value="eng">English</option>
+                        <option value="fre">French</option>
+                        <option value="jap">Japanese</option>
+                        <option value="hin">Hindi</option>
+                    </select>
                 </div>
                 <div class="col d-flex align-items-center justify-content-center">
                     <button id="arrow"><img src="static/arrow.png" alt="arrow"></button>
                 </div>
                 <div class="col">
-                    <div class="label-div">
-                        <label for="to">Target Language : </label>
-                        <select name="to" id="to">
-                            <option value="" selected>Choose a Language</option>
-                            <option value="tam">Tamil</option>
-                            <option value="eng">English</option>
-                            <option value="fre">French</option>
-                            <option value="jap">Japanese</option>
-                            <option value="hin">Hindi</option>
-                        </select>
-                    </div>
+                    <label for="to">Target Language : </label>
+                    <select name="to" id="to">
+                        <option value="none" selected>Choose a Language</option>
+                        <option value="tam">Tamil</option>
+                        <option value="eng">English</option>
+                        <option value="fre">French</option>
+                        <option value="jap">Japanese</option>
+                        <option value="hin">Hindi</option>
+                    </select>
                 </div>
             </div>
 
@@ -148,32 +171,34 @@
                 </div>
             </div>
 
-            <div class="row d-flex flex-column text-center" style="margin: 0px 0px 30px 0;">
-                <div class="tscribe">
-                    <div class="label-div">
-                        <label for="tscribe_text">Transcribed Text : </label>
-                        <p id="tscribe_text"></p>
-                    </div>
+            <div class="row texts d-flex flex-column" style="margin: 0px 0px 30px 0; padding-left: 20rem;">
+                
+                <div class="label-div">
+                    <label for="tscribe_text">Transcribed Text : </label>
+                    <p id="tscribe_text"></p>
                 </div>
 
-                <div class="tslate">
-                    <div class="label-div">
-                        <label for="tslate_text">Translated Text : </label>
-                        <p id="tslate_text"></p>
-                    </div>
+                <div class="label-div">
+                    <label for="tslate_text">Translated Text : </label>
+                    <p id="tslate_text"></p>
                 </div>
 
-                <div class="emotion">
+                <div class="emotion row d-flex align-items-center justify-content-center">
                     <div class="label-div">
                         <label for="emo">Emotion : </label>
                         <p id="emo"></p>
-                    </div>
+                        <button class="review good">
+                            <i class="fa fa-thumbs-up"></i> Good</button>
+                        <button class="review bad"><i class="fas fa-thumbs-down"></i> Bad</button>
+                        <input id="feedbk" type="text" placeholder="Feedback">
+                    </div>   
                 </div>
+
             </div>
 
             <div class="row d-flex justify-content-center">
                 <div class="col audio-div d-flex align-items-center justify-content-center">
-                    <audio id="audioPlayer" controls autoplay >
+                    <audio id="audioPlayer" controls autoplay>
                         <source id="audioSource" type="audio/mpeg">
                         Your browser does not support the audio element.
                     </audio>
@@ -185,34 +210,57 @@
     <script>
         $(document).ready(function() {
             $('#arrow').click(function() {
-            var fromValue = $('#from').val();
-            var toValue = $('#to').val();
-            
-            $('#from').val(toValue);
-            $('#to').val(fromValue);
-        });
+                var fromlang = $('#from').val();
+                var tolang = $('#to').val();
+                if(fromlang=="none" || tolang=="none"){
+                    alert("Please Choose a Language");
+                }
+                else{
+                    $('#from').val(tolang);
+                    $('#to').val(fromlang);
+                }
+            });
+
+            $('.bad').click(function(){
+                $('#feedbk').fadeIn();
+            });
 
             $('#start').click(function() {
-                $.post('/start', function(data) {
+                var fromlang = $('#from').val();
+                var tolang = $('#to').val();
+                if(fromlang=="none" || tolang=="none"){
+                    alert("Please Choose a Language");
+                }
+                else{
+                    $.post('/start', function(data) {
                     if (data.success) {
                         $('#start').prop('disabled', true);
                         $('#stop').prop('disabled', false);
                     }
                 });
+                }
             });
 
             $('#stop').click(function() {
                 var fromlang = $('#from').val();
                 var tolang = $('#to').val();
+                
                 $.post('/stop', {from: fromlang, to: tolang}, function(data) {
                     if (data.success) {
                         $('#start').prop('disabled', false);
                         $('#stop').prop('disabled', true);
 
                         // Update the UI with response data
-                        $('#tscribe_text').text(data.tscribed_text);
-                        $('#tslate_text').text(data.tslated_text);
-                        $('#emo').text(data.emotion);
+                        $('#tscribe_text').fadeOut(function() {
+                            $(this).text(data.tscribed_text).fadeIn();
+                        });
+                        $('#tslate_text').fadeOut(function() {
+                            $(this).text(data.tslated_text).fadeIn();
+                        });
+                        $('#emo').fadeOut(function() {
+                            $(this).text(data.emotion).fadeIn();
+                        });
+                        $('.review').fadeIn();
                         console.log("Audio file path:", data.audio);
 
 
