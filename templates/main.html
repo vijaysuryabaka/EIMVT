@@ -183,6 +183,11 @@
                     <p id="tslate_text"></p>
                 </div>
 
+                <div class="label-div">
+                    <label for="emo">Emotion : </label>
+                    <p id="emo"></p>
+                </div>
+
                 <div class="emotion row d-flex align-items-center justify-content-center">
                     <div class="label-div">
                         <label for="emo">Emotion : </label>
@@ -193,7 +198,6 @@
                         <input id="feedbk" type="text" placeholder="Feedback">
                     </div>   
                 </div>
-
             </div>
 
             <div class="row d-flex justify-content-center">
@@ -251,6 +255,7 @@
                         $('#stop').prop('disabled', true);
 
                         // Update the UI with response data
+<<<<<<< HEAD
                         $('#tscribe_text').fadeOut(function() {
                             $(this).text(data.tscribed_text).fadeIn();
                         });
@@ -260,6 +265,13 @@
                         $('#emo').fadeOut(function() {
                             $(this).text(data.emotion).fadeIn();
                         });
+=======
+=======
+                        $('#tscribe_text').text(data.transcribed_text).fadeIn();
+                        $('#tslate_text').text(data.translated_text).fadeIn();
+                        $('#emo').text(data.emotion).fadeIn();
+                        $('#audioemo').text(data.audio_emotion).fadeIn();
+>>>>>>> 3c5ffab (Updated)
                         $('.review').fadeIn();
                         console.log("Audio file path:", data.audio);
 
