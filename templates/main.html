@@ -120,13 +120,21 @@
             border-radius: 25px;
             width: max-content;
         }
+        a{
+
+        }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="container-fluid">
             <a href="/"><img class="logo" src="static/nav logo.png" alt="logo"></a>
-            <a href="/user"><img class="prof" src="static/gg_profile.png" alt="prof"></a>
+            {% if session['username'] %}
+            <div>Welcome, {{ session['username'] }}!</div>
+            <a href="/auth/logout">Logout</a>
+            {% else %}
+                <a href="/user"><img class="prof" src="static/gg_profile.png" alt="prof"></a>
+            {% endif %}
         </div>
     </nav>
 
@@ -184,19 +192,21 @@
                 </div>
 
                 <div class="label-div">
-                    <label for="emo">Emotion : </label>
-                    <p id="emo"></p>
+                    <label for="audioemo">Audio Emotion : </label>
+                    <p id="audioemo"></p>
                 </div>
 
                 <div class="emotion row d-flex align-items-center justify-content-center">
                     <div class="label-div">
                         <label for="emo">Emotion : </label>
                         <p id="emo"></p>
-                        <button class="review good">
+                            <button class="review good">
                             <i class="fa fa-thumbs-up"></i> Good</button>
-                        <button class="review bad"><i class="fas fa-thumbs-down"></i> Bad</button>
-                        <input id="feedbk" type="text" placeholder="Feedback">
-                    </div>   
+                            <button class="review bad">
+                            <i class="fas fa-thumbs-down"></i> Bad</button>
+                            <button id="feedbackSubmit" class="mt-3" style="display:none;">Submit Feedback</button>
+                        <input id="feedbk" type="text" placeholder="Feedback" style="display:none;">
+                    </div>
                 </div>
             </div>
 
@@ -253,8 +263,9 @@
                     if (data.success) {
                         $('#start').prop('disabled', false);
                         $('#stop').prop('disabled', true);
-
+            
                         // Update the UI with response data
+<<<<<<< HEAD
 <<<<<<< HEAD
                         $('#tscribe_text').fadeOut(function() {
                             $(this).text(data.tscribed_text).fadeIn();
@@ -267,28 +278,88 @@
                         });
 =======
 =======
+=======
+>>>>>>> 724656d (DB for feedback)
                         $('#tscribe_text').text(data.transcribed_text).fadeIn();
                         $('#tslate_text').text(data.translated_text).fadeIn();
                         $('#emo').text(data.emotion).fadeIn();
                         $('#audioemo').text(data.audio_emotion).fadeIn();
+<<<<<<< HEAD
 >>>>>>> 3c5ffab (Updated)
                         $('.review').fadeIn();
                         console.log("Audio file path:", data.audio);
 
 
                         // Update audio source
+=======
+            
+                        // Show review buttons only after stop is successful
+                        $('.review').fadeIn();
+            
+                        console.log("Audio file path:", data.audio_url);
+            
+                        // Update and play the audio
+>>>>>>> 724656d (DB for feedback)
                         $('#audioSource').attr('src', data.audio_url);
-
-
-
-                        // Load and play the audio
                         var audioPlayer = $('#audioPlayer')[0];
                         audioPlayer.load();
                         audioPlayer.play();
-                }
+                    }
                 });
             });
         });
     </script>
+
+    <script>
+        $(document).ready(function() {
+            // Show feedback input and submit button when "Good" or "Bad" is clicked
+            $(".review").click(function() {
+                $("#feedbk").fadeIn();
+                $("#feedbackSubmit").fadeIn();
+            });
+        
+            // Submit feedback when "Submit Feedback" is clicked
+            $("#feedbackSubmit").click(function() {
+                var feedback = $("#feedbk").val();
+                var emotion = $(this).hasClass("good") ? "Good" : "Bad";
+                var transcribedText = $("#tscribe_text").text();
+                var translatedText = $("#tslate_text").text();
+                var audioEmotion = $("#audioemo").text();
+                var audioUrl = $("#audioSource").attr('src');
+                var inputLanguage = $("#from").val();
+                var outputLanguage = $("#to").val();
+        
+                // Proceed with AJAX submission as before
+                $.ajax({
+                    url: "/store_feedback",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        feedback: feedback,
+                        emotion: emotion,
+                        audio_emotion: audioEmotion,
+                        transcribed_text: transcribedText,
+                        translated_text: translatedText,
+                        audio_url: audioUrl,
+                        input_language: inputLanguage,
+                        output_language: outputLanguage
+                    }),
+                    success: function(response) {
+                        console.log(response);
+                        alert("Feedback submitted successfully!");
+                        // Optionally clear the feedback input and hide it again
+                        $("#feedbk").val('').fadeOut();
+                        $("#feedbackSubmit").fadeOut();
+                    },
+                    error: function(error) {
+                        console.log(error);
+                        alert("Error submitting feedback");
+                    }
+                });
+            });
+        });
+        
+    </script>
+        
 </body>
 </html>

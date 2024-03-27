@@ -6,7 +6,7 @@ from datetime import datetime
 import boto3
 import pyaudio
 from botocore.exceptions import NoCredentialsError
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, session
 from google.cloud import speech
 from google.cloud import texttospeech as tts
 from google.cloud import translate_v2 as translate
@@ -21,6 +21,7 @@ S3_BUCKET_NAME = 'audioemo'
 uri = 'mongodb+srv://Emo:9W6QkCDfFeLBBepA@cluster0.uc1at1a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 client = MongoClient(uri)
 db = client['EIMVT']
+vtran_collection = db["vtan"]
 
 emotions = pipeline('sentiment-analysis', model='arpanghoshal/EmoRoBERTa')
 
@@ -163,7 +164,7 @@ class MicrophoneRecorder:
         return emotion[0]['label']
     
     def audio_emo(self, audio_file_path):
-        api_url = "http://localhost:8080/classify-emotion"
+        api_url = "http://127.0.0.1:8000/classify-emotion"
         files = {'file': open(audio_file_path, 'rb')}
         try:
             response = requests.post(api_url, files=files)
@@ -223,13 +224,18 @@ class MicrophoneRecorder:
         # Attempt to upload to S3 and prepare the response URL
         try:
             self.upload_file_to_s3(local_filepath, s3_filepath)
-            audio_url = self.generate_s3_url(s3_filepath)
+            audio_url_s3 = self.generate_s3_url(s3_filepath)  # S3 URL
             print(f"File {local_filename} uploaded to S3 successfully.")
         except Exception as e:
             print(f"Failed to upload {local_filename} to S3: {e}. Using local file for response.")
-            # When running locally, replace the domain below with your Flask server address
-            audio_url = local_filepath
-        return audio_url
+            audio_url_s3 = None
+
+        # Always provide the local file path for fallback or additional uses
+        audio_url_local = local_filepath
+
+        # Return both URLs
+        return audio_url_local
+
     
     def upload_file_to_s3(self, file_name, s3_file_path):
         try:
@@ -302,6 +308,14 @@ def index():
 def user():
     return render_template('user.html')
 
+@app.route("/signup")
+def signup():
+    return render_template('signup.html')
+
+@app.route("/user-prefer")
+def preferenes():
+    return render_template('preferences.html')
+
 @app.route('/main')
 def main():
     return render_template('main.html')
@@ -317,10 +331,16 @@ def start():
     recorder.start_recording()
     return jsonify({'success': True})
 
-# @app.route('/start', methods=['POST'])
-# def start():
-#     recorder.start_recording()
-#     return jsonify({'success': True})
+@app.route('/store_feedback', methods=['POST'])
+def store_feedback():
+    data = request.get_json()
+    # Optionally, you can validate the received data here
+
+    # Store the data in MongoDB
+    vtran_collection.insert_one(data)
+
+    return jsonify({"message": "Feedback stored successfully"}), 200
+
 
 @app.route('/stop', methods=['POST'])
 def stop():
