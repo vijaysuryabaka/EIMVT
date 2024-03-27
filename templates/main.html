@@ -264,9 +264,7 @@
                         $('#start').prop('disabled', false);
                         $('#stop').prop('disabled', true);
             
-                        // Update the UI with response data
-<<<<<<< HEAD
-<<<<<<< HEAD
+
                         $('#tscribe_text').fadeOut(function() {
                             $(this).text(data.tscribed_text).fadeIn();
                         });
@@ -276,30 +274,22 @@
                         $('#emo').fadeOut(function() {
                             $(this).text(data.emotion).fadeIn();
                         });
-=======
-=======
-=======
->>>>>>> 724656d (DB for feedback)
+
                         $('#tscribe_text').text(data.transcribed_text).fadeIn();
                         $('#tslate_text').text(data.translated_text).fadeIn();
                         $('#emo').text(data.emotion).fadeIn();
                         $('#audioemo').text(data.audio_emotion).fadeIn();
-<<<<<<< HEAD
->>>>>>> 3c5ffab (Updated)
+
                         $('.review').fadeIn();
                         console.log("Audio file path:", data.audio);
 
 
-                        // Update audio source
-=======
-            
                         // Show review buttons only after stop is successful
                         $('.review').fadeIn();
             
                         console.log("Audio file path:", data.audio_url);
             
-                        // Update and play the audio
->>>>>>> 724656d (DB for feedback)
+
                         $('#audioSource').attr('src', data.audio_url);
                         var audioPlayer = $('#audioPlayer')[0];
                         audioPlayer.load();
