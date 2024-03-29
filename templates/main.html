@@ -120,6 +120,10 @@
             border-radius: 25px;
             width: max-content;
         }
+        #feedbackSubmit{
+            border:none;
+            background-color:#00694E;
+        }
         a{
 
         }
@@ -149,6 +153,7 @@
                     <label for="from">Source Language : </label>
                     <select name="from" id="from">
                         <option value="none" selected>Choose a Language</option>
+                        <option value="det">Detect</option>
                         <option value="tam">Tamil</option>
                         <option value="eng">English</option>
                         <option value="fre">French</option>
@@ -198,7 +203,7 @@
 
                 <div class="emotion row d-flex align-items-center justify-content-center">
                     <div class="label-div">
-                        <label for="emo">Emotion : </label>
+                        <label for="emo">Text Emotion : </label>
                         <p id="emo"></p>
                             <button class="review good">
                             <i class="fa fa-thumbs-up"></i> Good</button>

@@ -83,9 +83,15 @@ class MicrophoneRecorder:
         if not use_local_file:
             # If upload succeeds, remove the local file
             os.remove(filename)
-
+            
         # Process the recording, using S3 path if upload succeeded, or local path if failed
         file_path_for_processing = s3_input_path if not use_local_file else filename
+        
+        if fromlang == 'det':
+            detected_lang = self.detect_language(file_path_for_processing)
+            fromlang = lang_d_mapping.get(detected_lang, 'en-US')  # Default to English if language detection fails
+            print(f"Detected language: {detected_lang}")
+            
         transcribed_text = self.transcribe_audio(file_path_for_processing, fromlang, use_local_file)
         translated_text, emotext = self.trans_text(transcribed_text, tolang)
         audio_emotion = self.audio_emo(file_path_for_processing)
@@ -103,6 +109,22 @@ class MicrophoneRecorder:
         wf.writeframes(b''.join(self.frames))
         wf.close()
 
+        
+    def detect_language(self, audio_file_path):
+        api_lang_url = "http://127.0.0.1:9000/detect-language"
+        files = {'file': open(audio_file_path, 'rb')}
+        try:
+            response = requests.post(api_lang_url, files=files)
+            
+            if response.status_code == 200:
+                predicted_lang = response.json().get('PredictedLanguage')
+                print(f"Predicted language: {predicted_lang}")
+                return predicted_lang
+            else:
+                print("Failed to detect language ")
+                return "error"
+        except Exception as ex:
+            print(f"API request failed: {ex}")
 
     def transcribe_audio(self, file_path, fromlang, use_local_file=False):
         if use_local_file:
@@ -260,6 +282,16 @@ language_mapping = {
             
         }
 
+lang_d_mapping = {
+            'ta: Tamil': 'ta-IN',  # Tamil
+            'en: English': 'en-US',  # English
+            'fr: French': 'fr-FR',  # French
+            'ja: Japanese': 'ja-JP',# Japanese
+            'hi: Hindi': 'hi-IN',  # hindi
+            'te: Telugu': 'te-IN'
+            
+        }
+
 voice_map={
         'ta:IN' : 'ta-IN-Wavenet-D',
         'en-US' : 'en-US-Wavenet-D',
@@ -347,8 +379,10 @@ def stop():
     # Extract languages from the form data
     from_lang = request.form['from']
     to_lang = request.form['to']
-    
-    from_lang = language_mapping.get(from_lang)
+
+    if from_lang != 'det':
+        from_lang = language_mapping.get(from_lang)
+        
     to_lang = language_mapping.get(to_lang)
 
     # Process the audio recording and respond with results
