@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome CSS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>EIMVT</title>
+    <style>
+      body {
+        font-family: "Raleway", sans-serif;
+        background-color: #fbf6f1;
+        color: #00694e;
+        overflow-x: hidden;
+      }
+      nav {
+        background-color: #fbf6f1;
+        height: 70px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+      }
+      h4 {
+        font-size: 40px;
+        font-weight: medium;
+        color: #00694e;
+      }
+      .logo {
+        max-width: 67% !important;
+        max-height: 90% !important;
+      }
+      .prof {
+        width: 35px !important;
+      }
+      select {
+        margin-left: 10px;
+        width: 250px;
+        height: 43px;
+        border-radius: 36px;
+        padding: 10px;
+        color: #00694e;
+        border: 1px solid #00694e;
+        background-color: #fbf6f1;
+      }
+
+      #arrow {
+        background-color: unset;
+        border: none;
+      }
+      #arrow {
+        width: 200px !important;
+      }
+
+      a {
+        text-decoration: none;
+        color: #00694e;
+        font-size: 15px;
+      }
+      a:hover {
+        font-weight: bold;
+        color: #00694e;
+      }
+      .items.active {
+        font-weight: bolder;
+        background-color: #8ce6cd;
+        border-radius: 36px;
+        text-align: center;
+        padding-top: 12px;
+        width: 200px;
+        height: 50px;
+      }
+      /* .items:hover{
+            font-weight: bolder;
+            color: #00694E;
+            background-color:  #8CE6CD;
+            border-radius: 36px;
+            text-align: center;
+            width: 200px;
+            height: 50px;
+        } */
+      textarea {
+        color: #00694E;
+        background-color: #fbf6f1;
+        border: 1px solid#00694E;
+        border-radius: 30px;
+        padding: 20px;
+        width: 478px;
+        height: 200px;
+        overflow-y: auto;
+        scroll-behavior: smooth;
+        outline: none;
+        resize: none;
+      }
+
+      textarea::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* textarea::-webkit-scrollbar-thumb {
+            background-color: #FBF6F1; /* Color of the scrollbar thumb 
+            border-radius: 10px; /* Rounded corners of the thumb 
+        } */
+
+      textarea::placeholder {
+        color: #00694e;
+        font-size: 15px;
+        font-weight: lighter !important;
+      }
+      .button button {
+        color: #00694e;
+        font-size: 18px;
+        border: none;
+        background-color: #8ce6cd;
+        border-radius: 36px;
+        width: 150px;
+        height: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar d-flex align-items-center justify-content-between">
+      <a href="/"
+        ><img
+          class="logo"
+          src="static/nav logo.png"
+          alt="logo"
+          style="margin-left: 10px"
+      /></a>
+      <div
+        class="pages d-flex align-items-center justify-content-evenly"
+        style="width: 50%"
+      >
+        <a href="/main" class="items">Voice Translator</a>
+        <a href="/concept" class="items">Contextual Analysis</a>
+        <a href="/ttt" class="items active">Text Translation</a>
+      </div>
+      <a href="/user"
+        ><img
+          class="prof"
+          src="static/gg_profile.png"
+          alt="prof"
+          style="margin-right: 10px"
+      /></a>
+    </nav>
+
+    <!-- <div class="container-fluid">
+        <a href="/"><img class="logo" src="static/nav logo.png" alt="logo"></a>
+        {% if session['username'] %}
+        <div>Welcome, {{ session['username'] }}!</div>
+        <a href="/auth/logout">Logout</a>
+        {% else %}
+            <a href="/user"><img class="prof" src="static/gg_profile.png" alt="prof"></a>
+        {% endif %}
+    </div> -->
+
+    <main style="background-color: #fbf6f1">
+      <div class="container-fluid">
+        <div class="row text-center mt-5">
+          <h4>Text to Text Translation</h4>
+        </div>
+
+        <div
+          class="row d-flex align-items-center mt-5"
+          style="margin: 0px 0px 30px 0"
+        >
+          <div class="col d-flex align-items-center justify-content-end">
+            <label for="from">Source Language : </label>
+            <select name="from" id="from">
+              <option value="none" selected>Choose a Language</option>
+              <option value="tam">Tamil</option>
+              <option value="eng">English</option>
+              <option value="fre">French</option>
+              <option value="jap">Japanese</option>
+              <option value="hin">Hindi</option>
+              <option value="mal">Malayalam</option>
+            </select>
+          </div>
+          <div class="col d-flex align-items-center justify-content-center">
+            <button id="arrow">
+              <img src="static/arrow.png" alt="arrow" />
+            </button>
+          </div>
+          <div class="col">
+            <label for="to">Target Language : </label>
+            <select name="to" id="to">
+              <option value="none" selected>Choose a Language</option>
+              <option value="tam">Tamil</option>
+              <option value="eng">English</option>
+              <option value="fre">French</option>
+              <option value="jap">Japanese</option>
+              <option value="hin">Hindi</option>
+              <option value="mal">Malayalam</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="row d-flex justify-content-center mt-5">
+        <!-- Added mt-5 class for top margin -->
+        <div class="col d-flex justify-content-center">
+          <textarea
+            name="text"
+            id="text"
+            cols="30"
+            rows="5"
+            placeholder="Enter Text"
+          ></textarea>
+        </div>
+        <div class="col d-flex justify-content-center">
+          <textarea
+            name="trans"
+            id="trans"
+            cols="30"
+            rows="10"
+            placeholder="Translation"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="button d-flex justify-content-center mt-5">
+        <button id="start">Translation</button>
+      </div>
+
+      <div class="row d-flex justify-content-center mt-3">
+        <div
+          class="col audio-div d-flex align-items-center justify-content-center"
+        >
+          <audio id="audioPlayer" controls autoplay>
+            <source id="audioSource" type="audio/mpeg" />
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+      </div>
+    </main>
+  </body>
+
+  <script>
+     $("#start").click(function () {
+        var fromlang = $("#from").val();
+        var tolang = $("#to").val();
+        var text = $("#text").val(); // Use .val() to get the value of the textarea
+        console.log("Success");
+        console.log(text)
+        if (fromlang == "none" || tolang == "none") {
+          alert("Please Choose a Language");
+        } else if (text== "") {
+          alert("Please enter the Text");
+        } else {
+          $.post(
+            "/txt2txt",
+            { from: fromlang, to: tolang, text: text },
+            function (data) {
+              if (data.success) {
+                $("#trans").val(data.text).fadeIn();
+                console.log("Audio file path:", data.audio);
+                $("#audioSource").attr("src", data.audio);
+                var audioPlayer = $("#audioPlayer")[0];
+                audioPlayer.load();
+                audioPlayer.play();
+              }
+            }
+          );
+        }
+      });
+  </script>
+</html>
