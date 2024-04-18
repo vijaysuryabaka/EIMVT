@@ -92,7 +92,7 @@
             height: 50px;
         } */
       textarea {
-        color: #00694E;
+        color: #00694e;
         background-color: #fbf6f1;
         border: 1px solid#00694E;
         border-radius: 30px;
@@ -248,32 +248,43 @@
   </body>
 
   <script>
-     $("#start").click(function () {
-        var fromlang = $("#from").val();
-        var tolang = $("#to").val();
-        var text = $("#text").val(); // Use .val() to get the value of the textarea
-        console.log("Success");
-        console.log(text)
-        if (fromlang == "none" || tolang == "none") {
-          alert("Please Choose a Language");
-        } else if (text== "") {
-          alert("Please enter the Text");
-        } else {
-          $.post(
-            "/txt2txt",
-            { from: fromlang, to: tolang, text: text },
-            function (data) {
-              if (data.success) {
-                $("#trans").val(data.text).fadeIn();
-                console.log("Audio file path:", data.audio);
-                $("#audioSource").attr("src", data.audio);
-                var audioPlayer = $("#audioPlayer")[0];
-                audioPlayer.load();
-                audioPlayer.play();
-              }
+    $("#start").click(function () {
+      var fromlang = $("#from").val();
+      var tolang = $("#to").val();
+      var text = $("#text").val(); // Use .val() to get the value of the textarea
+      console.log("Success");
+      console.log(text);
+      if (fromlang == "none" || tolang == "none") {
+        alert("Please Choose a Language");
+      } else if (text == "") {
+        alert("Please enter the Text");
+      } else {
+        $.post(
+          "/txt2txt",
+          { from: fromlang, to: tolang, text: text },
+          function (data) {
+            if (data.success) {
+              $("#trans").val(data.text).fadeIn();
+              console.log("Audio file path:", data.audio);
+              $("#audioSource").attr("src", data.audio);
+              var audioPlayer = $("#audioPlayer")[0];
+              audioPlayer.load();
+              audioPlayer.play();
             }
-          );
-        }
-      });
+          }
+        );
+      }
+    });
+
+    $("#arrow").click(function () {
+          var fromlang = $("#from").val();
+          var tolang = $("#to").val();
+          if (fromlang == "none" || tolang == "none") {
+            alert("Please Choose a Language");
+          } else {
+            $("#from").val(tolang);
+            $("#to").val(fromlang);
+          }
+    });
   </script>
 </html>

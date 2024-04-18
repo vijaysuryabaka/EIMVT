@@ -1,4 +1,4 @@
 @echo off
 call env\Scripts\activate
-python extra.py
+python main.py
 pause
