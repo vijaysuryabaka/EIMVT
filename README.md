@@ -7,6 +7,9 @@ EIMVT is a powerful tool that enables one-on-one voice translation interactions 
 ### Description
 EIMVT integrates cutting-edge voice translation, emotion analysis, and voice cloning technologies. It analyzes emotional aspects in users' input voices, translates them into the desired language, and ensures the translated output reflects the authentic emotional expression of the user.
 
+### Emotional Analysis
+To incorporate emotional analysis into EIMVT, we utilize the SpeechEmo_Recognition project available at [github.com/githubLINGESH/SpeechEmo_Recognition](https://github.com/githubLINGESH/SpeechEmo_Recognition). This project provides advanced emotional analysis capabilities, allowing EIMVT to accurately detect and interpret emotional cues present in the input voices.
+
 ### Installation
 To install EIMVT, follow these steps:
 
